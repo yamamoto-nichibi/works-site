@@ -133,7 +133,10 @@
    const grid = document.getElementById('categoryGrid');
    grid.innerHTML = CATEGORY_ORDER.map(key => {
     const cat = CATEGORIES[key];
-    const count = allWorks.filter(w => w.category === key).length;
+    const count = allWorks.filter(w => {
+     const c = Array.isArray(w.category) ? w.category[0] : w.category;
+     return c === key;
+    }).length;
     const isEmpty = count === 0;
     return `
         <div class="category-card ${isEmpty ? 'disabled' : ''}"
@@ -156,7 +159,10 @@
   // ==============================
   function showCategory(key) {
    const cat = CATEGORIES[key];
-   const works = allWorks.filter(w => w.category === key);
+   const works = allWorks.filter(w => {
+    const c = Array.isArray(w.category) ? w.category[0] : w.category;
+    return c === key;
+   });
 
    document.getElementById('categoryTitle').textContent = cat.label;
    document.getElementById('categorySubtitle').textContent = cat.subtitle;
@@ -177,11 +183,11 @@
             ${(w.tags || []).map(t => `<span class="work-tag-pill">${t}</span>`).join('')}
           </div>
           <div class="work-actions">
-            ${w.link_type === 'site' && w.link_url
+            ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'site' && w.link_url
               ? `<button class="btn-site btn-external" onclick="openLink('${w.title}', '${w.link_url}', 'site')">🔗 サイトを見る</button>`
               : ''
             }
-            ${w.link_type === 'pdf' && w.link_url
+            ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'pdf' && w.link_url
               ? `<button class="btn-site btn-pdf" onclick="openLink('${w.title}', '${w.link_url}', 'pdf')">📄 PDF</button>`
               : ''
             }
