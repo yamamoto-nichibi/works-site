@@ -180,7 +180,7 @@
         <div class="work-info">
           <div class="work-title">${w.title}</div>
           <div class="work-tags">
-            ${(w.tags || []).map(t => `<span class="work-tag-pill">${t}</span>`).join('')}
+            ${(typeof w.tags === 'string' ? w.tags.split(/[\s,、]+/).filter(Boolean) : (w.tags || [])).map(t => `<span class="work-tag-pill">${t}</span>`).join('')}
           </div>
           <div class="work-actions">
             ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'site' && w.link_url
