@@ -184,11 +184,11 @@
           </div>
           <div class="work-actions">
             ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'site' && w.link_url
-              ? `<button class="btn-site btn-external" onclick="openLink('${w.title}', '${w.link_url}', 'site')">🔗 サイトを見る</button>`
+              ? `<button class="btn-site btn-external" onclick="window.open('${w.link_url}', '_blank')">🔗 サイトを見る</button>`
               : ''
             }
             ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'pdf' && w.link_url
-              ? `<button class="btn-site btn-pdf" onclick="openLink('${w.title}', '${w.link_url}', 'pdf')">📄 PDF</button>`
+              ? `<button class="btn-site btn-pdf" onclick="window.open('${w.link_url}', '_blank')">📄 PDF</button>`
               : ''
             }
           </div>
