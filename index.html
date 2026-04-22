@@ -1,262 +1,188 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
- <meta name="apple-mobile-web-app-capable" content="yes">
- <meta name="apple-mobile-web-app-status-bar-style" content="default">
- <meta name="apple-mobile-web-app-title" content="実績一覧">
- <link rel="manifest" href="/manifest.json">
- <title>実績一覧</title>
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="実績一覧">
+  <link rel="manifest" href="/manifest.json">
+  <title>実績一覧</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
- <!-- HEADER -->
- <header class="header">
-  <div class="header-logo">株式会社<span>日美</span></div>
-  <button class="back-btn" id="backBtn" onclick="showTop()">
-   <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M9 2L4 7l5 5" />
-   </svg>
-   戻る
-  </button>
- </header>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <img src="rogo.png" alt="日美" class="header-logo-img">
+      <span class="logo-text">実績一覧</span>
+    </div>
+    <button class="back-btn" id="backBtn" onclick="showTop()">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 2L4 7l5 5"/>
+      </svg>
+      戻る
+    </button>
+  </header>
 
- <!-- TOP PAGE -->
- <div class="page active" id="topPage">
-  <div class="top-hero">
-   <h1>Our Works</h1>
-   <p>カテゴリを選んでください</p>
+  <!-- TOP PAGE -->
+  <div class="page active" id="topPage">
+    <div class="top-hero">
+      <h1>Our Works</h1>
+      <p>カテゴリを選んでください</p>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
   </div>
-  <div class="category-grid" id="categoryGrid">
-   <!-- JSで動的に生成 -->
+
+  <!-- CATEGORY PAGE -->
+  <div class="page" id="categoryPage">
+    <div class="category-header">
+      <small id="categorySubtitle"></small>
+      <h2 id="categoryTitle"></h2>
+    </div>
+    <div class="works-grid" id="worksGrid"></div>
   </div>
- </div>
 
- <!-- CATEGORY PAGE -->
- <div class="page" id="categoryPage">
-  <div class="category-header">
-   <div class="category-title" id="categoryTitle"></div>
-   <div class="category-subtitle" id="categorySubtitle"></div>
+  <!-- ローディング -->
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
   </div>
-  <div class="works-grid" id="worksGrid"></div>
- </div>
 
- <!-- ローディング -->
- <div class="loading" id="loading">
-  <div class="loading-spinner"></div>
- </div>
+  <script>
+    // ==============================
+    // ★ここを書き換えてください★
+    const SERVICE_ID = 'nichibi';
+    const API_KEY    = 'rgymqZidkqQQhZN7paVGbeH88ijMiS1uUGgc';
+    // ==============================
 
- <!-- MODAL -->
- <div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-   <div class="modal-icon" id="modalIcon"></div>
-   <h3 id="modalTitle"></h3>
-   <p id="modalBody"></p>
-   <div class="modal-btns">
-    <button class="modal-btn modal-btn-cancel" onclick="closeModal()">閉じる</button>
-    <button class="modal-btn modal-btn-primary" id="modalActionBtn">開く</button>
-   </div>
-  </div>
- </div>
+    // カテゴリ定義
+    const CATEGORIES = {
+      web:     { label: 'Webデザイン',  subtitle: 'CATEGORY' },
+      system:  { label: 'システム開発', subtitle: 'CATEGORY' },
+      graphic: { label: 'グラフィック', subtitle: 'CATEGORY' },
+      led:     { label: 'LED',          subtitle: 'CATEGORY' },
+    };
 
- <script>
-  // ==============================
-  // ★ここを書き換えてください★1
-  const SERVICE_ID = 'nichibi';
-  const API_KEY = 'rgymqZidkqQQhZN7paVGbeH88ijMiS1uUGgc';
-  // ==============================
+    const CATEGORY_ORDER = ['web', 'system', 'graphic', 'led'];
 
-  const CATEGORIES = {
-   web: {
-    label: 'Webサイト',
-    subtitle: 'WEB SITE',
-    emoji: '🌐',
-    tagClass: 'tag-web'
-   },
-   system: {
-    label: 'システム開発',
-    subtitle: 'SYSTEM',
-    emoji: '⚙️',
-    tagClass: 'tag-system'
-   },
-   graphic: {
-    label: 'グラフィック',
-    subtitle: 'GRAPHIC',
-    emoji: '🎨',
-    tagClass: 'tag-graphic'
-   },
-   led: {
-    label: 'LED',
-    subtitle: 'LED',
-    emoji: '💡',
-    tagClass: 'tag-led'
-   },
-  };
+    // カテゴリアイコン（SVGファイル参照）
+    const ICONS = {
+      web:     '<img src="1.svg" width="36" height="36" alt="Webデザイン">',
+      system:  '<img src="2.svg" width="36" height="36" alt="システム開発">',
+      graphic: '<img src="3.svg" width="36" height="36" alt="グラフィック">',
+      led:     '<img src="4.svg" width="36" height="36" alt="LED">',
+    };
 
-  const CATEGORY_ORDER = ['web', 'system', 'graphic', 'led'];
+    let allWorks = [];
 
-  let allWorks = []; // MicroCMSから取得した全データを保持
-
-  // ==============================
-  // MicroCMS からデータ取得
-  // ==============================
-  async function fetchWorks() {
-   showLoading(true);
-   try {
-    const res = await fetch(
-     `https://${SERVICE_ID}.microcms.io/api/v1/works?limit=100`, {
-      headers: {
-       'X-MICROCMS-API-KEY': API_KEY
+    // ── MicroCMS からデータ取得 ──
+    async function fetchWorks() {
+      showLoading(true);
+      try {
+        const res = await fetch(
+          `https://${SERVICE_ID}.microcms.io/api/v1/works?limit=100`,
+          { headers: { 'X-MICROCMS-API-KEY': API_KEY } }
+        );
+        if (!res.ok) throw new Error('API取得エラー');
+        const data = await res.json();
+        allWorks = data.contents;
+      } catch (e) {
+        console.error(e);
+        alert('データの取得に失敗しました。APIキーとサービスIDを確認してください。');
+      } finally {
+        showLoading(false);
+        renderCategoryGrid();
       }
-     }
-    );
-    if (!res.ok) throw new Error('API取得エラー');
-    const data = await res.json();
-    allWorks = data.contents;
-   } catch (e) {
-    console.error(e);
-    alert('データの取得に失敗しました。APIキーとサービスIDを確認してください。');
-   } finally {
-    showLoading(false);
-    renderCategoryGrid();
-   }
-  }
+    }
 
-  // ==============================
-  // カテゴリグリッドを描画
-  // ==============================
-  function renderCategoryGrid() {
-   const grid = document.getElementById('categoryGrid');
-   grid.innerHTML = CATEGORY_ORDER.map(key => {
-    const cat = CATEGORIES[key];
-    const count = allWorks.filter(w => {
-     const c = Array.isArray(w.category) ? w.category[0] : w.category;
-     return c === key;
-    }).length;
-    const isEmpty = count === 0;
-    return `
-        <div class="category-card ${isEmpty ? 'disabled' : ''}"
-             ${isEmpty ? '' : `onclick="showCategory('${key}')"`}>
-          <div class="category-icon">${cat.emoji}</div>
-          <div>
+    // ── カテゴリグリッド描画 ──
+    function renderCategoryGrid() {
+      const grid = document.getElementById('categoryGrid');
+      grid.innerHTML = CATEGORY_ORDER.map(key => {
+        const cat   = CATEGORIES[key];
+        const count = allWorks.filter(w => {
+          const c = Array.isArray(w.category) ? w.category[0] : w.category;
+          return c === key;
+        }).length;
+        const empty = count === 0;
+
+        return `
+          <div class="category-card${empty ? ' disabled' : ''}"
+               ${empty ? '' : `onclick="showCategory('${key}')"`}>
+            <div class="category-icon">${ICONS[key]}</div>
             <div class="category-label">${cat.label}</div>
-            ${isEmpty
-              ? `<div class="no-works-badge">準備中</div>`
-              : `<div class="category-count">${count}件の実績</div>`
-            }
-          </div>
-        </div>
-      `;
-   }).join('');
-  }
+          </div>`;
+      }).join('');
+    }
 
-  // ==============================
-  // カテゴリページを表示
-  // ==============================
-  function showCategory(key) {
-   const cat = CATEGORIES[key];
-   const works = allWorks.filter(w => {
-    const c = Array.isArray(w.category) ? w.category[0] : w.category;
-    return c === key;
-   });
+    // ── カテゴリページ表示 ──
+    function showCategory(key) {
+      const cat   = CATEGORIES[key];
+      const works = allWorks.filter(w => {
+        const c = Array.isArray(w.category) ? w.category[0] : w.category;
+        return c === key;
+      });
 
-   document.getElementById('categoryTitle').textContent = cat.label;
-   document.getElementById('categorySubtitle').textContent = cat.subtitle;
+      document.getElementById('categorySubtitle').textContent = cat.subtitle;
+      document.getElementById('categoryTitle').textContent    = cat.label;
 
-   const grid = document.getElementById('worksGrid');
-   grid.innerHTML = works.map(w => `
-      <div class="work-card">
-        <div class="work-thumb">
-          ${w.thumbnail
-            ? `<img src="${w.thumbnail.url}" alt="${w.title}">`
-            : `<div class="work-thumb-inner">${cat.emoji}</div>`
-          }
-          <span class="work-tag ${cat.tagClass}">${cat.label}</span>
-        </div>
-        <div class="work-info">
-          <div class="work-title">${w.title}</div>
-          <div class="work-tags">
-            ${(typeof w.tags === 'string' ? w.tags.split(/[\s,、]+/).filter(Boolean) : (w.tags || [])).map(t => `<span class="work-tag-pill">${t}</span>`).join('')}
-          </div>
-          <div class="work-actions">
-            ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'site' && w.link_url
-              ? `<button class="btn-site btn-external" onclick="window.open('${w.link_url}', '_blank')">🔗 サイトを見る</button>`
-              : ''
-            }
-            ${(Array.isArray(w.link_type) ? w.link_type[0] : w.link_type) === 'pdf' && w.link_url
-              ? `<button class="btn-site btn-pdf" onclick="window.open('${w.link_url}', '_blank')">📄 PDF</button>`
-              : ''
-            }
-          </div>
-        </div>
-      </div>
-    `).join('');
+      const grid = document.getElementById('worksGrid');
+      grid.innerHTML = works.map(w => {
+        const tags = (
+          typeof w.tags === 'string'
+            ? w.tags.split(/[\s,、]+/).filter(Boolean)
+            : (w.tags || [])
+        ).map(t => `<span class="work-tag-pill">${t}</span>`).join('');
 
-   document.getElementById('topPage').classList.remove('active');
-   const cp = document.getElementById('categoryPage');
-   cp.classList.add('active');
-   cp.style.animation = 'none';
-   requestAnimationFrame(() => {
-    cp.style.animation = '';
-   });
+        const thumb = w.thumbnail
+          ? `<img src="${w.thumbnail.url}" alt="${w.title}">`
+          : `<div class="thumb-placeholder"></div>`;
 
-   document.getElementById('backBtn').style.display = 'flex';
-  }
+        const url = w.link_url || '#';
 
-  // ==============================
-  // トップページに戻る
-  // ==============================
-  function showTop() {
-   document.getElementById('topPage').classList.add('active');
-   document.getElementById('categoryPage').classList.remove('active');
-   document.getElementById('backBtn').style.display = 'none';
-   const p = document.getElementById('topPage');
-   p.style.animation = 'none';
-   requestAnimationFrame(() => {
-    p.style.animation = '';
-   });
-  }
+        return `
+          <a class="work-card" href="${url}" target="_blank" rel="noopener">
+            <div class="work-thumb">${thumb}</div>
+            <div class="work-title">${w.title}</div>
+            <div class="work-tags">${tags}</div>
+          </a>`;
+      }).join('');
 
-  // ==============================
-  // リンクを開く（モーダル経由）
-  // ==============================
-  function openLink(title, url, type) {
-   const isPdf = type === 'pdf';
-   document.getElementById('modalIcon').textContent = isPdf ? '📄' : '🔗';
-   document.getElementById('modalTitle').textContent = isPdf ? '資料PDFを開きます' : '外部サイトを開きます';
-   document.getElementById('modalBody').textContent = `「${title}」を表示します。`;
-   document.getElementById('modalActionBtn').textContent = isPdf ? 'PDFを開く' : 'サイトを開く';
-   document.getElementById('modalActionBtn').onclick = () => {
-    window.open(url, '_blank');
-    closeModal();
-   };
-   document.getElementById('modalOverlay').classList.add('active');
-  }
+      document.getElementById('topPage').classList.remove('active');
+      const cp = document.getElementById('categoryPage');
+      cp.classList.add('active');
+      cp.style.animation = 'none';
+      requestAnimationFrame(() => { cp.style.animation = ''; });
+      document.getElementById('backBtn').style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
-  function closeModal() {
-   document.getElementById('modalOverlay').classList.remove('active');
-  }
+    // ── トップページに戻る ──
+    function showTop() {
+      document.getElementById('categoryPage').classList.remove('active');
+      document.getElementById('topPage').classList.add('active');
+      document.getElementById('backBtn').style.display = 'none';
+      const p = document.getElementById('topPage');
+      p.style.animation = 'none';
+      requestAnimationFrame(() => { p.style.animation = ''; });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
-  function showLoading(show) {
-   document.getElementById('loading').style.display = show ? 'flex' : 'none';
-  }
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'flex' : 'none';
+    }
 
-  // モーダル外クリックで閉じる
-  document.getElementById('modalOverlay').addEventListener('click', function (e) {
-   if (e.target === this) closeModal();
-  });
+    // 初期化
+    fetchWorks();
 
-  // 初期化
-  fetchWorks();
+    // Service Worker 登録
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 
-  // Service Worker登録
-  if ('serviceWorker' in navigator) {
-   navigator.serviceWorker.register('/sw.js');
-  }
- </script>
 </body>
 </html>
