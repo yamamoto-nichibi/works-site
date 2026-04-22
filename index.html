@@ -252,6 +252,11 @@
 
   // 初期化
   fetchWorks();
+
+  // Service Worker登録
+  if ('serviceWorker' in navigator) {
+   navigator.serviceWorker.register('/sw.js');
+  }
  </script>
 </body>
 </html>
