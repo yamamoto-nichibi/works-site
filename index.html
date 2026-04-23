@@ -6,18 +6,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="実績一覧">
+  <!-- ブラウザキャッシュを無効化 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="manifest" href="/manifest.json">
   <title>実績一覧</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
+  <link rel="stylesheet" href="style.css?v=202604230226">
 </head>
 <body>
 
   <!-- HEADER -->
   <header class="header">
     <div class="header-logo">
-      <img src="rogo.png" alt="日美" class="header-logo-img">
+      <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
+      <img src="rogo.png?v=202604230226" alt="日美" class="header-logo-img">
       <span class="logo-text">実績一覧</span>
     </div>
     <button class="back-btn" id="backBtn" onclick="showTop()">
@@ -58,6 +64,9 @@
     const API_KEY    = 'rgymqZidkqQQhZN7paVGbeH88ijMiS1uUGgc';
     // ==============================
 
+    // ★デプロイのたびにここの数字も上げる★
+    const APP_VERSION = '202604230226';
+
     // カテゴリ定義
     const CATEGORIES = {
       web:     { label: 'Webデザイン',  subtitle: 'CATEGORY' },
@@ -68,12 +77,12 @@
 
     const CATEGORY_ORDER = ['web', 'system', 'graphic', 'led'];
 
-    // カテゴリアイコン（SVGファイル参照）
+    // カテゴリアイコン（SVGファイル参照 + バージョンクエリ）
     const ICONS = {
-      web:     '<img src="1.svg" width="36" height="36" alt="Webデザイン">',
-      system:  '<img src="2.svg" width="36" height="36" alt="システム開発">',
-      graphic: '<img src="3.svg" width="36" height="36" alt="グラフィック">',
-      led:     '<img src="4.svg" width="36" height="36" alt="LED">',
+      web:     `<img src="1.svg?v=${APP_VERSION}" width="36" height="36" alt="Webデザイン">`,
+      system:  `<img src="2.svg?v=${APP_VERSION}" width="36" height="36" alt="システム開発">`,
+      graphic: `<img src="3.svg?v=${APP_VERSION}" width="36" height="36" alt="グラフィック">`,
+      led:     `<img src="4.svg?v=${APP_VERSION}" width="36" height="36" alt="LED">`,
     };
 
     let allWorks = [];
@@ -178,9 +187,29 @@
     // 初期化
     fetchWorks();
 
-    // Service Worker 登録
+    // ── Service Worker 登録 & 即時アップデート ──
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+      navigator.serviceWorker.register('/sw.js').then(reg => {
+        // 新しいSWが待機中なら即座に有効化
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              newSW.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      });
+
+      // SWが切り替わったらページを自動リロード
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     }
   </script>
 

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'works-site-v2'; // ★デプロイのたびにバージョンを上げる
+// ★デプロイのたびにバージョンを上げる★
+const CACHE_NAME = 'works-site-v202604230226';
 
 const ASSETS = [
   '/',
@@ -12,32 +13,44 @@ const ASSETS = [
   '/4.svg',
 ];
 
+// インストール：新しいSWをすぐ有効化
 self.addEventListener('install', e => {
-  // 新しいSWをすぐに有効化
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
 });
 
+// アクティベート：古いキャッシュをすべて削除
 self.addEventListener('activate', e => {
-  // 古いキャッシュをすべて削除
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim()) // すぐに全クライアントを制御下に
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
+// メッセージ受信：index.htmlからSKIP_WAITINGを受け取ったら即時切り替え
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// フェッチ：HTMLはネットワーク優先、他はキャッシュ優先
 self.addEventListener('fetch', e => {
-  // HTMLはネットワーク優先（常に最新を取得）
+  // ナビゲーション（HTMLページ）は常にネットワークから取得
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match('/index.html'))
+      fetch(e.request, { cache: 'no-store' })
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
-  // その他はキャッシュ優先
+
+  // CSS・SVG・画像はキャッシュ優先（なければネットワーク）
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
