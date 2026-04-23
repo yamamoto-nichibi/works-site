@@ -306,7 +306,7 @@ body {
 }
 
 .work-title {
- font-size: 13px;
+ font-size: 16px;
  font-weight: 500;
  color: #111;
  line-height: 1.55;
@@ -372,7 +372,7 @@ body {
  /* 実績グリッドのみ1列 */
  .works-grid {
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 48px;
   padding: 20px 16px 48px;
  }
 
