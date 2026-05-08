@@ -1,217 +1,247 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="実績一覧">
-  <!-- ブラウザキャッシュを無効化 -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <link rel="manifest" href="/manifest.json">
-  <title>実績一覧</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
-  <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
-  <link rel="stylesheet" href="style.css?v=202604230226">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="default">
+ <meta name="apple-mobile-web-app-title" content="実績一覧">
+ <!-- ブラウザキャッシュを無効化 -->
+ <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+ <meta http-equiv="Pragma" content="no-cache">
+ <meta http-equiv="Expires" content="0">
+ <link rel="manifest" href="/manifest.json">
+ <link rel="apple-touch-icon" href="/icon-192.png">
+ <title>実績一覧</title>
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+ <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
+ <link rel="stylesheet" href="style.css?v=202604230226">
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-logo">
-      <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
-      <img src="rogo.png?v=202604230226" alt="日美" class="header-logo-img">
-      <span class="logo-text">実績一覧</span>
-    </div>
-    <button class="back-btn" id="backBtn" onclick="showTop()">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 2L4 7l5 5"/>
-      </svg>
-      戻る
-    </button>
-  </header>
-
-  <!-- TOP PAGE -->
-  <div class="page active" id="topPage">
-    <div class="top-hero">
-      <h1>Our Works</h1>
-      <p>カテゴリを選んでください</p>
-    </div>
-    <div class="category-grid" id="categoryGrid"></div>
+ <!-- HEADER -->
+ <header class="header">
+  <div class="header-logo">
+   <!-- ★デプロイのたびに ?v= の数字を上げる★ -->
+   <img src="rogo.png?v=202604230226" alt="日美" class="header-logo-img">
+   <span class="logo-text">実績一覧</span>
   </div>
+  <button class="back-btn" id="backBtn" onclick="showTop()">
+   <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M9 2L4 7l5 5" />
+   </svg>
+   戻る
+  </button>
+ </header>
 
-  <!-- CATEGORY PAGE -->
-  <div class="page" id="categoryPage">
-    <div class="category-header">
-      <small id="categorySubtitle"></small>
-      <h2 id="categoryTitle"></h2>
-    </div>
-    <div class="works-grid" id="worksGrid"></div>
+ <!-- TOP PAGE -->
+ <div class="page active" id="topPage">
+  <div class="top-hero">
+   <h1>Our Works</h1>
+   <p>カテゴリを選んでください</p>
   </div>
+  <div class="category-grid" id="categoryGrid"></div>
+ </div>
 
-  <!-- ローディング -->
-  <div class="loading" id="loading">
-    <div class="loading-spinner"></div>
+ <!-- CATEGORY PAGE -->
+ <div class="page" id="categoryPage">
+  <div class="category-header">
+   <small id="categorySubtitle"></small>
+   <h2 id="categoryTitle"></h2>
   </div>
+  <div class="works-grid" id="worksGrid"></div>
+ </div>
 
-  <script>
-    // ==============================
-    // ★ここを書き換えてください★
-    const SERVICE_ID = 'nichibi';
-    const API_KEY    = 'rgymqZidkqQQhZN7paVGbeH88ijMiS1uUGgc';
-    // ==============================
+ <!-- ローディング -->
+ <div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+ </div>
 
-    // ★デプロイのたびにここの数字も上げる★
-    const APP_VERSION = '202604230226';
+ <script>
+  // ==============================
+  // ★ここを書き換えてください★
+  const SERVICE_ID = 'nichibi';
+  const API_KEY = 'rgymqZidkqQQhZN7paVGbeH88ijMiS1uUGgc';
+  // ==============================
 
-    // カテゴリ定義
-    const CATEGORIES = {
-      web:     { label: 'Webデザイン',  subtitle: 'CATEGORY' },
-      system:  { label: 'システム開発', subtitle: 'CATEGORY' },
-      graphic: { label: 'グラフィック', subtitle: 'CATEGORY' },
-      led:     { label: 'LED',          subtitle: 'CATEGORY' },
-    };
+  // ★デプロイのたびにここの数字も上げる★
+  const APP_VERSION = '202604230226';
 
-    const CATEGORY_ORDER = ['web', 'system', 'graphic', 'led'];
+  // カテゴリ定義
+  const CATEGORIES = {
+   web: {
+    label: 'Webデザイン',
+    subtitle: 'CATEGORY'
+   },
+   system: {
+    label: 'システム開発',
+    subtitle: 'CATEGORY'
+   },
+   graphic: {
+    label: 'グラフィック',
+    subtitle: 'CATEGORY'
+   },
+   led: {
+    label: 'LED',
+    subtitle: 'CATEGORY'
+   },
+  };
 
-    // カテゴリアイコン（SVGファイル参照 + バージョンクエリ）
-    const ICONS = {
-      web:     `<img src="1.svg?v=${APP_VERSION}" width="36" height="36" alt="Webデザイン">`,
-      system:  `<img src="2.svg?v=${APP_VERSION}" width="36" height="36" alt="システム開発">`,
-      graphic: `<img src="3.svg?v=${APP_VERSION}" width="36" height="36" alt="グラフィック">`,
-      led:     `<img src="4.svg?v=${APP_VERSION}" width="36" height="36" alt="LED">`,
-    };
+  const CATEGORY_ORDER = ['web', 'system', 'graphic', 'led'];
 
-    let allWorks = [];
+  // カテゴリアイコン（SVGファイル参照 + バージョンクエリ）
+  const ICONS = {
+   web: `<img src="1.svg?v=${APP_VERSION}" width="36" height="36" alt="Webデザイン">`,
+   system: `<img src="2.svg?v=${APP_VERSION}" width="36" height="36" alt="システム開発">`,
+   graphic: `<img src="3.svg?v=${APP_VERSION}" width="36" height="36" alt="グラフィック">`,
+   led: `<img src="4.svg?v=${APP_VERSION}" width="36" height="36" alt="LED">`,
+  };
 
-    // ── MicroCMS からデータ取得 ──
-    async function fetchWorks() {
-      showLoading(true);
-      try {
-        const res = await fetch(
-          `https://${SERVICE_ID}.microcms.io/api/v1/works?limit=100`,
-          { headers: { 'X-MICROCMS-API-KEY': API_KEY } }
-        );
-        if (!res.ok) throw new Error('API取得エラー');
-        const data = await res.json();
-        allWorks = data.contents;
-      } catch (e) {
-        console.error(e);
-        alert('データの取得に失敗しました。APIキーとサービスIDを確認してください。');
-      } finally {
-        showLoading(false);
-        renderCategoryGrid();
+  let allWorks = [];
+
+  // ── MicroCMS からデータ取得 ──
+  async function fetchWorks() {
+   showLoading(true);
+   try {
+    const res = await fetch(
+     `https://${SERVICE_ID}.microcms.io/api/v1/works?limit=100`, {
+      headers: {
+       'X-MICROCMS-API-KEY': API_KEY
       }
-    }
+     }
+    );
+    if (!res.ok) throw new Error('API取得エラー');
+    const data = await res.json();
+    allWorks = data.contents;
+   } catch (e) {
+    console.error(e);
+    alert('データの取得に失敗しました。APIキーとサービスIDを確認してください。');
+   } finally {
+    showLoading(false);
+    renderCategoryGrid();
+   }
+  }
 
-    // ── カテゴリグリッド描画 ──
-    function renderCategoryGrid() {
-      const grid = document.getElementById('categoryGrid');
-      grid.innerHTML = CATEGORY_ORDER.map(key => {
-        const cat   = CATEGORIES[key];
-        const count = allWorks.filter(w => {
-          const c = Array.isArray(w.category) ? w.category[0] : w.category;
-          return c === key;
-        }).length;
-        const empty = count === 0;
+  // ── カテゴリグリッド描画 ──
+  function renderCategoryGrid() {
+   const grid = document.getElementById('categoryGrid');
+   grid.innerHTML = CATEGORY_ORDER.map(key => {
+    const cat = CATEGORIES[key];
+    const count = allWorks.filter(w => {
+     const c = Array.isArray(w.category) ? w.category[0] : w.category;
+     return c === key;
+    }).length;
+    const empty = count === 0;
 
-        return `
+    return `
           <div class="category-card${empty ? ' disabled' : ''}"
                ${empty ? '' : `onclick="showCategory('${key}')"`}>
             <div class="category-icon">${ICONS[key]}</div>
             <div class="category-label">${cat.label}</div>
           </div>`;
-      }).join('');
-    }
+   }).join('');
+  }
 
-    // ── カテゴリページ表示 ──
-    function showCategory(key) {
-      const cat   = CATEGORIES[key];
-      const works = allWorks.filter(w => {
-        const c = Array.isArray(w.category) ? w.category[0] : w.category;
-        return c === key;
-      });
+  // ── カテゴリページ表示 ──
+  function showCategory(key) {
+   const cat = CATEGORIES[key];
+   const works = allWorks.filter(w => {
+    const c = Array.isArray(w.category) ? w.category[0] : w.category;
+    return c === key;
+   });
 
-      document.getElementById('categorySubtitle').textContent = cat.subtitle;
-      document.getElementById('categoryTitle').textContent    = cat.label;
+   document.getElementById('categorySubtitle').textContent = cat.subtitle;
+   document.getElementById('categoryTitle').textContent = cat.label;
 
-      const grid = document.getElementById('worksGrid');
-      grid.innerHTML = works.map(w => {
-        const tags = (
-          typeof w.tags === 'string'
-            ? w.tags.split(/[\s,、]+/).filter(Boolean)
-            : (w.tags || [])
-        ).map(t => `<span class="work-tag-pill">${t}</span>`).join('');
+   const grid = document.getElementById('worksGrid');
+   grid.innerHTML = works.map(w => {
+    const tags = (
+     typeof w.tags === 'string' ?
+     w.tags.split(/[\s,、]+/).filter(Boolean) :
+     (w.tags || [])
+    ).map(t => `<span class="work-tag-pill">${t}</span>`).join('');
 
-        const thumb = w.thumbnail
-          ? `<img src="${w.thumbnail.url}" alt="${w.title}">`
-          : `<div class="thumb-placeholder"></div>`;
+    const thumb = w.thumbnail ?
+     `<img src="${w.thumbnail.url}" alt="${w.title}">` :
+     `<div class="thumb-placeholder"></div>`;
 
-        const url = w.link_url || '#';
+    const url = w.link_url || '#';
 
-        return `
+    return `
           <a class="work-card" href="${url}" target="_blank" rel="noopener">
             <div class="work-thumb">${thumb}</div>
             <div class="work-title">${w.title}</div>
             <div class="work-tags">${tags}</div>
           </a>`;
-      }).join('');
+   }).join('');
 
-      document.getElementById('topPage').classList.remove('active');
-      const cp = document.getElementById('categoryPage');
-      cp.classList.add('active');
-      cp.style.animation = 'none';
-      requestAnimationFrame(() => { cp.style.animation = ''; });
-      document.getElementById('backBtn').style.display = 'flex';
-      window.scrollTo({ top: 0, behavior: 'instant' });
+   document.getElementById('topPage').classList.remove('active');
+   const cp = document.getElementById('categoryPage');
+   cp.classList.add('active');
+   cp.style.animation = 'none';
+   requestAnimationFrame(() => {
+    cp.style.animation = '';
+   });
+   document.getElementById('backBtn').style.display = 'flex';
+   window.scrollTo({
+    top: 0,
+    behavior: 'instant'
+   });
+  }
+
+  // ── トップページに戻る ──
+  function showTop() {
+   document.getElementById('categoryPage').classList.remove('active');
+   document.getElementById('topPage').classList.add('active');
+   document.getElementById('backBtn').style.display = 'none';
+   const p = document.getElementById('topPage');
+   p.style.animation = 'none';
+   requestAnimationFrame(() => {
+    p.style.animation = '';
+   });
+   window.scrollTo({
+    top: 0,
+    behavior: 'instant'
+   });
+  }
+
+  function showLoading(show) {
+   document.getElementById('loading').style.display = show ? 'flex' : 'none';
+  }
+
+  // 初期化
+  fetchWorks();
+
+  // ── Service Worker 登録 & 即時アップデート ──
+  if ('serviceWorker' in navigator) {
+   navigator.serviceWorker.register('/sw.js').then(reg => {
+    // 新しいSWが待機中なら即座に有効化
+    if (reg.waiting) reg.waiting.postMessage({
+     type: 'SKIP_WAITING'
+    });
+    reg.addEventListener('updatefound', () => {
+     const newSW = reg.installing;
+     newSW.addEventListener('statechange', () => {
+      if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+       newSW.postMessage({
+        type: 'SKIP_WAITING'
+       });
+      }
+     });
+    });
+   });
+
+   // SWが切り替わったらページを自動リロード
+   let refreshing = false;
+   navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+     refreshing = true;
+     window.location.reload();
     }
-
-    // ── トップページに戻る ──
-    function showTop() {
-      document.getElementById('categoryPage').classList.remove('active');
-      document.getElementById('topPage').classList.add('active');
-      document.getElementById('backBtn').style.display = 'none';
-      const p = document.getElementById('topPage');
-      p.style.animation = 'none';
-      requestAnimationFrame(() => { p.style.animation = ''; });
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-
-    function showLoading(show) {
-      document.getElementById('loading').style.display = show ? 'flex' : 'none';
-    }
-
-    // 初期化
-    fetchWorks();
-
-    // ── Service Worker 登録 & 即時アップデート ──
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        // 新しいSWが待機中なら即座に有効化
-        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        reg.addEventListener('updatefound', () => {
-          const newSW = reg.installing;
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              newSW.postMessage({ type: 'SKIP_WAITING' });
-            }
-          });
-        });
-      });
-
-      // SWが切り替わったらページを自動リロード
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
-        }
-      });
-    }
-  </script>
+   });
+  }
+ </script>
 
 </body>
 </html>
